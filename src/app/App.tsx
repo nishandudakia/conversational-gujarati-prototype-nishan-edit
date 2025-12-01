@@ -1,56 +1,48 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useRealtimeAgent } from './hooks';
 import {
-  createDisplayOutputTool,
-  createRatePronunciationTool,
-  createProvidePronunciationFeedbackTool
-} from './tools';
+  createDisplayOutputTool} from './tools';
 import AppHeader from './components/AppHeader';
 import Main from './components/Main';
 import Output from './components/Output';
-import PronunciationRating from './components/PronunciationRating';
-import PronunciationFeedback from './components/PronunciationFeedback';
 import './App.css';
 
+export interface ConversationMessage {
+  id: string;
+  userenglishText: string;
+  userphoneticGujaratiText: string;
+  pronounciationRating: string;
+  aienglishText: string;
+  aiphoneticGujaratiText: string;
+  suggestions: string;
+  timestamp: number;
+}
+
 function App() {
-  const [translationPhrase, setTranslationPhrase] = useState({
-    englishText: '',
-    phoneticGujaratiText: '',
-    gujaratiText: ''
-  });
-  const [pronunciationFeedback, setPronunciationFeedback] = useState('');
-  const [pronunciationRating, setPronunciationRating] = useState(0);
+  const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
+
+  const addMessage = useCallback((message: Omit<ConversationMessage, 'id' | 'timestamp'>) => {
+    const newMessage: ConversationMessage = {
+      ...message,
+      id: `msg-${Date.now()}-${Math.random()}`,
+      timestamp: Date.now()
+    };
+    setConversationHistory(prev => [...prev, newMessage]);
+  }, []);
 
   const tools = useMemo(() => {
     return [
-      createDisplayOutputTool(setTranslationPhrase),
-      createRatePronunciationTool(setPronunciationRating),
-      createProvidePronunciationFeedbackTool(setPronunciationFeedback)
+      createDisplayOutputTool(addMessage)
     ];
-  }, [setTranslationPhrase]);
+  }, [addMessage]);
 
   useRealtimeAgent(tools);
-
-  // When translation phrase changes, clear pronunciation feedback & rating.
-  useEffect(() => {
-    setPronunciationFeedback('');
-    setPronunciationRating(0);
-  }, [translationPhrase]);
-
-  // If the stars are 3, clear the feedback, as the user has pronounced it well.
-  useEffect(() => {
-    if (pronunciationRating === 3) {
-      setPronunciationFeedback('');
-    }
-  }, [pronunciationRating]);
 
   return (
     <div className='App'>
       <AppHeader />
       <Main>
-        <Output {...translationPhrase} />
-        <PronunciationRating rating={pronunciationRating} />
-        <PronunciationFeedback feedbackText={pronunciationFeedback} />
+        <Output conversationHistory={conversationHistory} />
       </Main>
     </div>
   );
