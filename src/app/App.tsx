@@ -5,6 +5,7 @@ import {
 import AppHeader from './components/AppHeader';
 import Main from './components/Main';
 import Output from './components/Output';
+import SearchBox from './components/SearchBox';
 import './App.css';
 
 export interface ConversationMessage {
@@ -44,6 +45,7 @@ function App() {
       <Main>
         <Output conversationHistory={conversationHistory} />
       </Main>
+      <SearchBox />
     </div>
   );
 }
