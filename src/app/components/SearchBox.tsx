@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 interface SearchResult {
   phonetic: string;
@@ -10,6 +10,7 @@ export default function SearchBox() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -39,32 +40,55 @@ export default function SearchBox() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 bg-white border border-gray-300 rounded-lg shadow-lg p-4 w-80 max-h-96 overflow-y-auto">
-      <h3 className="text-lg font-semibold mb-2">Gujarati Search</h3>
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search in English..."
-        className="w-full p-2 border border-gray-300 rounded mb-2"
-        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-      />
-      <button
-        onClick={handleSearch}
-        disabled={loading}
-        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
-      >
-        {loading ? 'Searching...' : 'Search'}
-      </button>
-      <div className="mt-2">
-        {results.map((result, index) => (
-          <div key={index} className="mb-2 p-2 bg-gray-100 rounded">
-            <div className="font-mono">{result.phonetic}</div>
-            <div className="text-sm text-gray-600">{result.english}</div>
-            <div className="text-xs text-blue-600 mt-1">Pronunciation: {result.breakdown}</div>
+    <>
+      {isMinimized ? (
+        <button
+          onClick={() => setIsMinimized(false)}
+          className="fixed bottom-4 right-4 bg-blue-500 text-white px-3 py-2 rounded shadow-lg hover:bg-blue-600"
+          title="Open Gujarati Search"
+        >
+          Gujarati Search
+        </button>
+      ) : (
+        <div className="fixed bottom-4 right-4 bg-white border border-gray-300 rounded-lg shadow-lg p-4 w-80 max-h-96 overflow-y-auto">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-semibold">Gujarati Search</h3>
+            <button
+              onClick={() => setIsMinimized(true)}
+              className="bg-black text-white p-1 rounded text-xs hover:bg-gray-800"
+              title="Minimize"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
           </div>
-        ))}
-      </div>
-    </div>
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search in English..."
+            className="w-full p-2 border border-gray-300 rounded mb-2"
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+          />
+          <button
+            onClick={handleSearch}
+            disabled={loading}
+            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+          >
+            {loading ? 'Searching...' : 'Search'}
+          </button>
+          <div className="mt-2">
+            {results.map((result, index) => (
+              <div key={index} className="mb-2 p-2 bg-gray-100 rounded">
+                <div className="font-mono">{result.phonetic}</div>
+                <div className="text-sm text-gray-600">{result.english}</div>
+                <div className="text-xs text-blue-600 mt-1">Pronunciation: {result.breakdown}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
